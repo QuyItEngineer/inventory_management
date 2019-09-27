@@ -16,6 +16,13 @@
         "lodash": "^4.17.13",
         "resolve-url-loader": "^2.3.1",
         "sass": "^1.15.2",
-        "sass-loader": "^7.1.0"
+        "sass-loader": "^7.1.0",
+        "vue": "^2.5.7",
+        "vue-codemirror": "^4.0.5",
+        "vue-meta": "^1.5.0",
+        "vue-router": "^3.0.1",
+        "vue-toasted": "^1.1.24",
+        "vue2-datepicker": "^2.4.0",
+        "vuex": "^3.0.1"
     }
 }
