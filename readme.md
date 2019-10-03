@@ -13,6 +13,7 @@ Please install
 
 ```
 cd {project_dir}
+docker-compose build
 docker-compose up -d
 docker-compose exec app bash
 composer install
