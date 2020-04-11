@@ -15,6 +15,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('home', function () {
-    return view('welcome');
-});
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+
+Auth::routes(['verify' => true]);
+
+Route::get('/home', 'HomeController@index')->middleware('verified');
+
+
+Route::resource('products', 'ProductController');
+
+Route::resource('clients', 'ClientController');
+
+Route::resource('orders', 'OrderController');
