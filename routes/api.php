@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::post('/products/check-quantity','ProductApiController@checkProduct')->name('check_product');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

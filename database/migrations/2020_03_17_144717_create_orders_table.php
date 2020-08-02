@@ -15,13 +15,10 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id')->autoIncrement();
-            $table->unsignedInteger('product_id');
+            $table->string('unique_code');
             $table->unsignedInteger('client_id');
-            $table->integer('quantity');
-            $table->float('wholesale_price')->default(0)->comment('ban le');
-            $table->float('retail_price')->default(0)->comment('ban si');
-            $table->float('real_cost');
-            $table->float('debt_in_scope')->comment('cong no trong 1 khoan thoi gian');
+            $table->integer('client_type')->comment('0: normal; 1: si; 2: le');
+            $table->float('total_price')->default(0);
             $table->timestamps();
 
             $table->foreign('client_id')

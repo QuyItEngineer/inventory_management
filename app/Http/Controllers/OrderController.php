@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\Client;
+use App\Models\Order;
+use App\Models\Product;
 use App\Repositories\OrderRepository;
 use App\Http\Controllers\AppBaseController;
+use App\Services\OrderService;
+use Exception;
 use Illuminate\Http\Request;
 use Flash;
 use Response;
@@ -14,10 +19,20 @@ class OrderController extends AppBaseController
 {
     /** @var  OrderRepository */
     private $orderRepository;
+    /**
+     * @var OrderService
+     */
+    private $orderService;
 
-    public function __construct(OrderRepository $orderRepo)
+    /**
+     * OrderController constructor.
+     * @param OrderRepository $orderRepo
+     * @param OrderService $orderService
+     */
+    public function __construct(OrderRepository $orderRepo, OrderService $orderService)
     {
         $this->orderRepository = $orderRepo;
+        $this->orderService = $orderService;
     }
 
     /**
@@ -29,7 +44,7 @@ class OrderController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $orders = $this->orderRepository->all();
+        $orders = $this->orderRepository->all()->sortByDesc("updated_at");
 
         return view('orders.index')
             ->with('orders', $orders);
@@ -42,7 +57,17 @@ class OrderController extends AppBaseController
      */
     public function create()
     {
-        return view('orders.create');
+        $products = Product::all(['unique_code','name','quantity'])->sortBy('name');
+        $clients = Client::all()->sortBy("name")->pluck('name','id');
+
+        return view('orders.create')
+            ->with('products', $products)
+            ->with('client_type', [
+                Client::CLIENT_TYPE_NORMAL_TEXT,
+                Client::CLIENT_TYPE_WHOLESALE_TEXT,
+                Client::CLIENT_TYPE_RETAIL_TEXT,
+            ])
+            ->with('clients', $clients);
     }
 
     /**
@@ -51,16 +76,21 @@ class OrderController extends AppBaseController
      * @param CreateOrderRequest $request
      *
      * @return Response
+     * @throws Exception
      */
     public function store(CreateOrderRequest $request)
     {
         $input = $request->all();
 
-        $order = $this->orderRepository->create($input);
-
+        $order = $this->orderService->create($input);
         Flash::success('Order saved successfully.');
+        return redirect('orders-preview/' . $order->id);
+    }
 
-        return redirect(route('orders.index'));
+    public function showUpdateDetail($id)
+    {
+        $order = $this->orderRepository->find($id);
+        return view('orders.show-preview')->with('order', $order);
     }
 
     /**
@@ -121,7 +151,11 @@ class OrderController extends AppBaseController
             return redirect(route('orders.index'));
         }
 
-        $order = $this->orderRepository->update($request->all(), $id);
+        try {
+            $order = $this->orderService->updateDetail($id, $request->all());
+        } catch (Exception $e) {
+            Flash::error($e->getMessage());
+        }
 
         Flash::success('Order updated successfully.');
 
@@ -133,7 +167,7 @@ class OrderController extends AppBaseController
      *
      * @param int $id
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return Response
      */

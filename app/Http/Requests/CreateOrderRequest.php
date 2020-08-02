@@ -25,6 +25,9 @@ class CreateOrderRequest extends FormRequest
      */
     public function rules()
     {
-        return Order::$rules;
+        return [
+            'client_id' => 'required|exists:clients,id',
+            'client_type' => 'required|in:0,1,2',
+        ];
     }
 }

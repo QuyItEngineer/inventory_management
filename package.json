@@ -16,16 +16,20 @@
         "jquery": "^3.2",
         "laravel-mix": "^4.0.7",
         "lodash": "^4.17.13",
-        "popper.js": "^1.12",
+        "popper.js": "^1.16.1",
         "resolve-url-loader": "^2.3.1",
-        "sass": "^1.15.2",
+        "sass": "^1.26.10",
         "sass-loader": "^7.1.0",
-        "vue": "^2.5.7",
+        "vue": "^2.5.17",
         "vue-codemirror": "^4.0.5",
         "vue-meta": "^1.5.0",
         "vue-router": "^3.0.1",
+        "vue-template-compiler": "^2.6.10",
         "vue-toasted": "^1.1.24",
         "vue2-datepicker": "^2.4.0",
         "vuex": "^3.0.1"
+    },
+    "dependencies": {
+        "node-sass": "^4.14.1"
     }
 }

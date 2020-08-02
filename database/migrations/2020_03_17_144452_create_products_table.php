@@ -18,9 +18,8 @@ class CreateProductsTable extends Migration
             $table->string('unique_code');
             $table->string('name');
             $table->integer('quantity')->default(0);
-            $table->float('price')->default(0);
             $table->float('input_price')->default(0)->comment('nhap hang');
-            $table->float('ctv_price')->default(0)->comment('cong tac vien');
+            $table->float('price')->default(0);
             $table->float('wholesale_price')->default(0)->comment('ban le');
             $table->float('retail_price')->default(0)->comment('ban si');
             $table->timestamps();

@@ -16,6 +16,8 @@ class CreateOrderProductsTable extends Migration
         Schema::create('order_products', function (Blueprint $table) {
             $table->unsignedInteger('order_id');
             $table->unsignedInteger('product_id');
+            $table->integer('quantity')->default(0);
+            $table->float('sum_price')->default(0);
             $table->timestamps();
 
             $table->foreign('order_id')

@@ -29,7 +29,7 @@ class ProductController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $products = $this->productRepository->all();
+        $products = $this->productRepository->all()->sortByDesc("updated_at");
 
         return view('products.index')
             ->with('products', $products);

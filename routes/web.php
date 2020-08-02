@@ -30,3 +30,5 @@ Route::resource('products', 'ProductController');
 Route::resource('clients', 'ClientController');
 
 Route::resource('orders', 'OrderController');
+Route::get('orders-preview/{id}', 'OrderController@showUpdateDetail')->name('showUpdateDetail');;
+Route::put('orders/{id}/detail', 'OrderController@updateDetail');

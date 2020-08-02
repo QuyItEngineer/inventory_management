@@ -34,6 +34,17 @@ php artisan key:generate
  artisan key:generate
 ```
  
+## Install Nodejs and VueJs
+php artisan ui vue
+npm install
+npm install node-sass
+npm install popper.js --save
+npm install --save-dev sass-loader@7.1.0
+npm install popper.js --save
+npm audit fix
+php artisan ui vue
+npm run dev
+
 ## More:
 Setup laravel source and docker by nginx: 
 https://www.digitalocean.com/community/tutorials/how-to-set-up-laravel-nginx-and-mysql-with-docker-compose
