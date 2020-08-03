@@ -74,11 +74,11 @@ class OrderService implements \App\Contracts\OrderService
     {
         DB::beginTransaction();
         try {
-            $orderAttribute = $this->prepareOrderCreateParams($params);
-            $order = $this->orderRepository->update($orderAttribute, $id);
+//            $orderAttribute = $this->prepareOrderCreateParams($params);
+//            $order = $this->orderRepository->update($orderAttribute, $id);
             $this->saveOrderProducts($this->prepareOrderProductsCreateParams($params) ?? [], $id);
             DB::commit();
-            return $order;
+            return true;
         } catch (Exception $exception) {
             DB::rollBack();
             report($exception);

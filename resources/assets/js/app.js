@@ -5,6 +5,7 @@
  */
 
 import AddProductInOrder from './components/AddProductInOrder';
+import UpdateProductInOrder from './components/UpdateProductInOrder';
 
 require('./bootstrap');
 
@@ -30,6 +31,7 @@ window.Vue = require('vue');
  */
 
 Vue.component('add-product-in-order', AddProductInOrder);
+Vue.component('update-product-in-order', UpdateProductInOrder);
 
 const app = new Vue({
     el: '#app',

@@ -45,10 +45,13 @@
 
 <script>
     export default {
-        name: "AddProductInOrder",
+        name: "UpdateProductInOrder",
         props: {
             products : {
                 type : Object,
+            },
+            orders : {
+                type : Array,
             },
         },
         data() {
@@ -59,6 +62,9 @@
                     quantity: '',
                 }],
             }
+        },
+        mounted() {
+            this.items = this.orders
         },
         methods: {
             addNewProduct() {

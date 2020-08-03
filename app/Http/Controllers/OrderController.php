@@ -6,6 +6,7 @@ use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Client;
 use App\Models\Order;
+use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Repositories\OrderRepository;
 use App\Http\Controllers\AppBaseController;
@@ -81,8 +82,11 @@ class OrderController extends AppBaseController
     public function store(CreateOrderRequest $request)
     {
         $input = $request->all();
-
         $order = $this->orderService->create($input);
+        if ($order == false) {
+            Flash::error('Order saved fail.');
+            throw new Exception('Order saved fail');
+        }
         Flash::success('Order saved successfully.');
         return redirect('orders-preview/' . $order->id);
     }
@@ -126,11 +130,30 @@ class OrderController extends AppBaseController
 
         if (empty($order)) {
             Flash::error('Order not found');
-
             return redirect(route('orders.index'));
         }
 
-        return view('orders.edit')->with('order', $order);
+        $clients = Client::all()->where('id', $order->client_id)->pluck('name','id');
+        $products = Product::all(['unique_code','name','quantity'])->sortBy('name');
+        $orderDetails = OrderProduct::query()
+            ->select([
+                'products.unique_code',
+                'products.name',
+                'order_products.quantity',
+            ])
+            ->join('products','order_products.product_id','=','products.id')
+            ->where('order_id',$order->id)->distinct()->get();
+
+        return view('orders.edit')
+            ->with('client_type', [
+                Client::CLIENT_TYPE_NORMAL_TEXT,
+                Client::CLIENT_TYPE_WHOLESALE_TEXT,
+                Client::CLIENT_TYPE_RETAIL_TEXT,
+            ])
+            ->with('clients', $clients)
+            ->with('products', $products)
+            ->with('orderDetails', $orderDetails)
+            ->with('order', $order);
     }
 
     /**
@@ -151,8 +174,12 @@ class OrderController extends AppBaseController
             return redirect(route('orders.index'));
         }
 
+        $params = array_merge($request->all(),[
+            'client_type' => $order->client_type
+        ]);
+
         try {
-            $order = $this->orderService->updateDetail($id, $request->all());
+            $order = $this->orderService->updateDetail($id, $params);
         } catch (Exception $e) {
             Flash::error($e->getMessage());
         }

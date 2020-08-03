@@ -10,11 +10,9 @@ use Illuminate\Database\Eloquent\Model as Model;
  * @version March 19, 2020, 3:57 pm UTC
  *
  * @property string unique_code
- * @property integer quantity
- * @property number wholesale_price
- * @property number retail_price
- * @property number real_cost
- * @property number debt_in_scope
+ * @property integer client_id
+ * @property integer client_type
+ * @property float total_price
  */
 class Order extends Model
 {
@@ -57,7 +55,13 @@ class Order extends Model
 
     public function client()
     {
-        $this->belongsTo(Client::class);
+        return $this->belongsTo('App\Models\Client','client_id');
+    }
+
+    public function productOrders()
+    {
+        return $this->belongsToMany('App\Models\OrderProduct','order_products',
+            'order_id','product_id');
     }
 
 }
