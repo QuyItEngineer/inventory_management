@@ -12,8 +12,6 @@
     <div id="app">
         <add-product-in-order :products='{!! json_encode($products) !!}' >
         </add-product-in-order>
-{{--        <add-product-in-order>--}}
-{{--        </add-product-in-order>--}}
     </div>
 
     <!-- Submit Field -->
