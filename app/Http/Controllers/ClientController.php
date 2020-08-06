@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Client;
 use App\Repositories\ClientRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class ClientController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $clients = $this->clientRepository->all();
+        $clients = $this->clientRepository->all()->sortByDesc("updated_at");
 
         return view('clients.index')
             ->with('clients', $clients);
@@ -152,5 +153,20 @@ class ClientController extends AppBaseController
         Flash::success('Client deleted successfully.');
 
         return redirect(route('clients.index'));
+    }
+
+    /**
+     * @param $param
+     * @return mixed
+     */
+    public function getAllName($param)
+    {
+        $client = Client::select([
+            'id',
+            'name' .
+            ''
+        ])->get();
+
+        return $client->toArray();
     }
 }

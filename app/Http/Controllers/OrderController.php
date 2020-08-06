@@ -4,8 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\Client;
+use App\Models\Order;
+use App\Models\OrderProduct;
+use App\Models\Product;
+use App\Repositories\OrderProductRepository;
 use App\Repositories\OrderRepository;
-use App\Http\Controllers\AppBaseController;
+use App\Services\OrderService;
+use Exception;
 use Illuminate\Http\Request;
 use Flash;
 use Response;
@@ -14,10 +20,26 @@ class OrderController extends AppBaseController
 {
     /** @var  OrderRepository */
     private $orderRepository;
+    /**
+     * @var OrderService
+     */
+    private $orderService;
+    /**
+     * @var OrderProductRepository
+     */
+    private $orderProductRepository;
 
-    public function __construct(OrderRepository $orderRepo)
+    /**
+     * OrderController constructor.
+     * @param OrderRepository $orderRepo
+     * @param OrderService $orderService
+     * @param OrderProductRepository $orderProductRepository
+     */
+    public function __construct(OrderRepository $orderRepo, OrderService $orderService, OrderProductRepository $orderProductRepository)
     {
         $this->orderRepository = $orderRepo;
+        $this->orderService = $orderService;
+        $this->orderProductRepository = $orderProductRepository;
     }
 
     /**
@@ -29,7 +51,7 @@ class OrderController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $orders = $this->orderRepository->all();
+        $orders = $this->orderRepository->all()->sortByDesc("updated_at");
 
         return view('orders.index')
             ->with('orders', $orders);
@@ -42,7 +64,17 @@ class OrderController extends AppBaseController
      */
     public function create()
     {
-        return view('orders.create');
+        $products = Product::all(['unique_code','name','quantity'])->sortBy('name');
+        $clients = Client::all()->sortBy("name")->pluck('name','id');
+
+        return view('orders.create')
+            ->with('products', $products)
+            ->with('client_type', [
+                Client::CLIENT_TYPE_NORMAL_TEXT,
+                Client::CLIENT_TYPE_WHOLESALE_TEXT,
+                Client::CLIENT_TYPE_RETAIL_TEXT,
+            ])
+            ->with('clients', $clients);
     }
 
     /**
@@ -51,16 +83,23 @@ class OrderController extends AppBaseController
      * @param CreateOrderRequest $request
      *
      * @return Response
+     * @throws Exception
      */
     public function store(CreateOrderRequest $request)
     {
         $input = $request->all();
-
-        $order = $this->orderRepository->create($input);
-
+        $order = $this->orderService->create($input);
+        if ($order == false) {
+            Flash::error('Order saved fail.');
+            throw new Exception('Order saved fail');
+        }
         Flash::success('Order saved successfully.');
+        return redirect('orders/' . $order->id);
+    }
 
-        return redirect(route('orders.index'));
+    public function showUpdateDetail($id)
+    {
+        return $this->orderService->generateThePdfFromOrder($id);
     }
 
     /**
@@ -79,8 +118,19 @@ class OrderController extends AppBaseController
 
             return redirect(route('orders.index'));
         }
+        $orderDetails = OrderProduct::query()
+            ->select([
+                'products.unique_code',
+                'products.name',
+                'order_products.quantity',
+                'order_products.sum_price',
+            ])
+            ->join('products','order_products.product_id','=','products.id')
+            ->where('order_id',$order->id)->get();
 
-        return view('orders.show')->with('order', $order);
+        return view('orders.show')
+            ->with('order', $order)
+            ->with('products', $orderDetails);
     }
 
     /**
@@ -96,11 +146,30 @@ class OrderController extends AppBaseController
 
         if (empty($order)) {
             Flash::error('Order not found');
-
             return redirect(route('orders.index'));
         }
 
-        return view('orders.edit')->with('order', $order);
+        $clients = Client::all()->where('id', $order->client_id)->pluck('name','id');
+        $products = Product::all(['unique_code','name','quantity'])->sortBy('name');
+        $orderDetails = OrderProduct::query()
+            ->select([
+                'products.unique_code',
+                'products.name',
+                'order_products.quantity',
+            ])
+            ->join('products','order_products.product_id','=','products.id')
+            ->where('order_id',$order->id)->distinct()->get();
+
+        return view('orders.edit')
+            ->with('client_type', [
+                Client::CLIENT_TYPE_NORMAL_TEXT,
+                Client::CLIENT_TYPE_WHOLESALE_TEXT,
+                Client::CLIENT_TYPE_RETAIL_TEXT,
+            ])
+            ->with('clients', $clients)
+            ->with('products', $products)
+            ->with('orderDetails', $orderDetails)
+            ->with('order', $order);
     }
 
     /**
@@ -121,7 +190,15 @@ class OrderController extends AppBaseController
             return redirect(route('orders.index'));
         }
 
-        $order = $this->orderRepository->update($request->all(), $id);
+        $params = array_merge($request->all(),[
+            'client_type' => $order->client_type
+        ]);
+
+        try {
+            $order = $this->orderService->updateDetail($id, $params);
+        } catch (Exception $e) {
+            Flash::error($e->getMessage());
+        }
 
         Flash::success('Order updated successfully.');
 
@@ -133,7 +210,7 @@ class OrderController extends AppBaseController
      *
      * @param int $id
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return Response
      */
@@ -148,6 +225,7 @@ class OrderController extends AppBaseController
         }
 
         $this->orderRepository->delete($id);
+        OrderProduct::query()->where('order_id',$id)->delete();
 
         Flash::success('Order deleted successfully.');
 

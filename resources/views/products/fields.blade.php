@@ -14,18 +14,13 @@
 </div>
 
 <div class="form-group col-sm-12">
-    {!! Form::label('price', 'Giá trung bình:') !!}
-    {!! Form::number('price', null, ['class' => 'form-control']) !!}
-</div>
-
-<div class="form-group col-sm-12">
     {!! Form::label('input_price', 'Giá nhập vào:') !!}
     {!! Form::number('input_price', null, ['class' => 'form-control']) !!}
 </div>
 
 <div class="form-group col-sm-12">
-    {!! Form::label('ctv_price', 'Giá cho cộng tác viên:') !!}
-    {!! Form::number('ctv_price', null, ['class' => 'form-control']) !!}
+    {!! Form::label('price', 'Giá bình thường:') !!}
+    {!! Form::number('price', null, ['class' => 'form-control']) !!}
 </div>
 
 <div class="form-group col-sm-12">

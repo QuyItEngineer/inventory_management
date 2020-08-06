@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model as Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Order
@@ -10,28 +11,20 @@ use Illuminate\Database\Eloquent\Model as Model;
  * @version March 19, 2020, 3:57 pm UTC
  *
  * @property string unique_code
- * @property integer quantity
- * @property number wholesale_price
- * @property number retail_price
- * @property number real_cost
- * @property number debt_in_scope
+ * @property integer client_id
+ * @property integer client_type
+ * @property float total_price
  */
 class Order extends Model
 {
-
     public $table = 'orders';
 
-
-
-
     public $fillable = [
-        'order_code',
         'unique_code',
-        'quantity',
-        'wholesale_price',
-        'retail_price',
-        'real_cost',
-        'debt_in_scope'
+        'client_id',
+        'client_type',
+        'total_price',
+        'updated_at',
     ];
 
     /**
@@ -41,13 +34,10 @@ class Order extends Model
      */
     protected $casts = [
         'id' => 'integer',
-        'order_code' => 'string', //en_code
         'unique_code' => 'string',
-        'quantity' => 'integer',
-        'wholesale_price' => 'float',
-        'retail_price' => 'float',
-        'real_cost' => 'float',
-        'debt_in_scope' => 'float'
+        'client_id' => 'integer',
+        'client_type' => 'integer',
+        'total_price' => 'float',
     ];
 
     /**
@@ -61,12 +51,21 @@ class Order extends Model
 
     public function products()
     {
-        return $this->belongsToMany('App\Models\Product');
+        return $this->belongsToMany('App\Models\Product','order_products');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function client()
     {
-        $this->belongsTo(Client::class);
+        return $this->belongsTo('App\Models\Client','client_id');
+    }
+
+    public function productOrders()
+    {
+        return $this->belongsToMany('App\Models\OrderProduct','order_products',
+            'order_id','product_id');
     }
 
 }

@@ -25,11 +25,11 @@ class Product extends Model
         'unique_code',
         'name',
         'quantity',
-        'price',
         'input_price',
-        'ctv_price',
+        'price',
         'wholesale_price',
-        'retail_price'
+        'retail_price',
+        'updated_at',
     ];
 
     /**
@@ -42,9 +42,8 @@ class Product extends Model
         'unique_code' => 'string',
         'name' => 'string',
         'quantity' => 'integer',
-        'price' => 'float',
         'input_price' => 'float',
-        'ctv_price' => 'float',
+        'price' => 'float',
         'wholesale_price' => 'float',
         'retail_price' => 'float'
     ];
@@ -55,11 +54,11 @@ class Product extends Model
      * @var array
      */
     public static $rules = [
-
+        'name' => 'unique:products,name'
     ];
 
     public function orders()
     {
-        return $this->belongsToMany('App\Models\Order');
+        return $this->belongsToMany('App\Models\Order','order_products');
     }
 }

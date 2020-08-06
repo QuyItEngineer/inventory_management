@@ -18,11 +18,15 @@ use Illuminate\Database\Eloquent\Model as Model;
  */
 class Client extends Model
 {
-
     public $table = 'clients';
 
+    const CLIENT_TYPE_NORMAL = 0;
+    const CLIENT_TYPE_WHOLESALE = 1;
+    const CLIENT_TYPE_RETAIL = 2;
 
-
+    const CLIENT_TYPE_NORMAL_TEXT = "Giá mặc định";
+    const CLIENT_TYPE_WHOLESALE_TEXT = "Bán sỉ";
+    const CLIENT_TYPE_RETAIL_TEXT = "Bán lẻ";
 
     public $fillable = [
         'name',
@@ -30,7 +34,8 @@ class Client extends Model
         'phone_number_2',
         'address',
         'car_group_type',
-        'shipping_type'
+        'shipping_type',
+        'updated_at',
     ];
 
     /**
@@ -54,13 +59,13 @@ class Client extends Model
      * @var array
      */
     public static $rules = [
-        'name' => 'required',
+        'name' => 'required|unique:clients,name',
         'phone_number_1' => 'required'
     ];
 
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany('App\Models\Order');
     }
 
 }

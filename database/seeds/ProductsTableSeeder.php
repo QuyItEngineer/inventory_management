@@ -16,6 +16,6 @@ class ProductsTableSeeder extends Seeder
         DB::table('products')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        factory(App\Models\Product::class, 20)->create();
+        factory(App\Models\Product::class, 10)->create();
     }
 }

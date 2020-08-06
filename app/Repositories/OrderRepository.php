@@ -18,11 +18,10 @@ class OrderRepository extends BaseRepository
      */
     protected $fieldSearchable = [
         'unique_code',
-        'quantity',
-        'wholesale_price',
-        'retail_price',
-        'real_cost',
-        'debt_in_scope'
+        'client_id',
+        'client_type',
+        'total_price',
+        'updated_at',
     ];
 
     /**
