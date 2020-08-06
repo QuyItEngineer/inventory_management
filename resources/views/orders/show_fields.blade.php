@@ -3,46 +3,44 @@
     {!! Form::label('unique_code', 'Unique Code:') !!}
     <p>{{ $order->unique_code }}</p>
 </div>
-
 <!-- Quantity Field -->
 <div class="form-group">
-    {!! Form::label('quantity', 'Quantity:') !!}
-    <p>{{ $order->quantity }}</p>
+    {!! Form::label('client_name', 'Tên khách hàng:') !!}
+    <p>{{ $order->client->name }}</p>
 </div>
-
-<!-- Wholesale Price Field -->
 <div class="form-group">
-    {!! Form::label('wholesale_price', 'Wholesale Price:') !!}
-    <p>{{ $order->wholesale_price }}</p>
+    {!! Form::label('quantity', 'Tổng tiền:') !!}
+    <p>{{ $order->total_price }}</p>
 </div>
-
-<!-- Retail Price Field -->
-<div class="form-group">
-    {!! Form::label('retail_price', 'Retail Price:') !!}
-    <p>{{ $order->retail_price }}</p>
-</div>
-
-<!-- Real Cost Field -->
-<div class="form-group">
-    {!! Form::label('real_cost', 'Real Cost:') !!}
-    <p>{{ $order->real_cost }}</p>
-</div>
-
-<!-- Debt In Scope Field -->
-<div class="form-group">
-    {!! Form::label('debt_in_scope', 'Debt In Scope:') !!}
-    <p>{{ $order->debt_in_scope }}</p>
-</div>
-
 <!-- Created At Field -->
 <div class="form-group">
-    {!! Form::label('created_at', 'Created At:') !!}
+    {!! Form::label('created_at', 'Ngày tạo:') !!}
     <p>{{ $order->created_at }}</p>
 </div>
-
 <!-- Updated At Field -->
 <div class="form-group">
-    {!! Form::label('updated_at', 'Updated At:') !!}
+    {!! Form::label('updated_at', 'Ngày chỉnh sửa:') !!}
     <p>{{ $order->updated_at }}</p>
+</div>
+
+<div class="table-responsive">
+    <table class="table" id="orders-table">
+        <thead>
+        <tr>
+            <th>Tên sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Số tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach($products as $product)
+            <tr>
+                <td>{{ $product->name }}</td>
+                <td>{{ $product->quantity }}</td>
+                <td>{{ $product->sum_price }}</td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
 </div>
 

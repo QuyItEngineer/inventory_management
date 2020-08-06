@@ -12,6 +12,7 @@
                 <div class="row" style="padding-left: 20px">
                     @include('orders.show_fields')
                     <a href="{{ route('orders.index') }}" class="btn btn-default">Back</a>
+                    <a href="{{ route('showUpdateDetail', [$order->id]) }}" class='btn btn-success'>Xuất Hóa đơn</a>
                 </div>
             </div>
         </div>

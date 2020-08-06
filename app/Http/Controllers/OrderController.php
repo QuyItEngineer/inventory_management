@@ -8,8 +8,8 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderProduct;
 use App\Models\Product;
+use App\Repositories\OrderProductRepository;
 use App\Repositories\OrderRepository;
-use App\Http\Controllers\AppBaseController;
 use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
@@ -24,16 +24,22 @@ class OrderController extends AppBaseController
      * @var OrderService
      */
     private $orderService;
+    /**
+     * @var OrderProductRepository
+     */
+    private $orderProductRepository;
 
     /**
      * OrderController constructor.
      * @param OrderRepository $orderRepo
      * @param OrderService $orderService
+     * @param OrderProductRepository $orderProductRepository
      */
-    public function __construct(OrderRepository $orderRepo, OrderService $orderService)
+    public function __construct(OrderRepository $orderRepo, OrderService $orderService, OrderProductRepository $orderProductRepository)
     {
         $this->orderRepository = $orderRepo;
         $this->orderService = $orderService;
+        $this->orderProductRepository = $orderProductRepository;
     }
 
     /**
@@ -88,13 +94,12 @@ class OrderController extends AppBaseController
             throw new Exception('Order saved fail');
         }
         Flash::success('Order saved successfully.');
-        return redirect('orders-preview/' . $order->id);
+        return redirect('orders/' . $order->id);
     }
 
     public function showUpdateDetail($id)
     {
-        $order = $this->orderRepository->find($id);
-        return view('orders.show-preview')->with('order', $order);
+        return $this->orderService->generateThePdfFromOrder($id);
     }
 
     /**
@@ -113,8 +118,19 @@ class OrderController extends AppBaseController
 
             return redirect(route('orders.index'));
         }
+        $orderDetails = OrderProduct::query()
+            ->select([
+                'products.unique_code',
+                'products.name',
+                'order_products.quantity',
+                'order_products.sum_price',
+            ])
+            ->join('products','order_products.product_id','=','products.id')
+            ->where('order_id',$order->id)->get();
 
-        return view('orders.show')->with('order', $order);
+        return view('orders.show')
+            ->with('order', $order)
+            ->with('products', $orderDetails);
     }
 
     /**
@@ -209,6 +225,7 @@ class OrderController extends AppBaseController
         }
 
         $this->orderRepository->delete($id);
+        OrderProduct::query()->where('order_id',$id)->delete();
 
         Flash::success('Order deleted successfully.');
 

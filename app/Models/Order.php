@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model as Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Order
@@ -53,6 +54,9 @@ class Order extends Model
         return $this->belongsToMany('App\Models\Product','order_products');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function client()
     {
         return $this->belongsTo('App\Models\Client','client_id');

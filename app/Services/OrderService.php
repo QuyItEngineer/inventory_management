@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Models\Client;
-use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Repositories\OrderProductRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
+use Barryvdh\DomPDF\Facade as PDF;
 use DB;
 use Exception;
 
@@ -59,7 +59,7 @@ class OrderService implements \App\Contracts\OrderService
             return $order;
         } catch (Exception $exception) {
             DB::rollBack();
-            report($exception);
+            \Log::error($exception->getMessage());
             return false;
         }
     }
@@ -75,8 +75,10 @@ class OrderService implements \App\Contracts\OrderService
         DB::beginTransaction();
         try {
 //            $orderAttribute = $this->prepareOrderCreateParams($params);
-//            $order = $this->orderRepository->update($orderAttribute, $id);
             $this->saveOrderProducts($this->prepareOrderProductsCreateParams($params) ?? [], $id);
+            $order = $this->orderRepository->update([
+                'total_price' => $this->getTotalPriceForUpdate($id)
+            ], $id);
             DB::commit();
             return true;
         } catch (Exception $exception) {
@@ -92,11 +94,10 @@ class OrderService implements \App\Contracts\OrderService
      */
     private function saveOrderProducts($products, $order_id = '')
     {
-        if (!empty($order_id)) {
-            $query = OrderProduct::query();
-            $query->where('order_id',$order_id)->delete();
-        }
-
+//        if (!empty($order_id)) {
+//            $query = OrderProduct::query();
+//            $query->where('order_id',$order_id)->delete();
+//        }
         $data = [
             'order_id' => $order_id,
         ];
@@ -131,10 +132,23 @@ class OrderService implements \App\Contracts\OrderService
         return $totalPrice;
     }
 
+    private function getTotalPriceForUpdate($id)
+    {
+        $totalPrice = 0;
+        $orderProducts = $this->orderProductRepository->where([
+            'order_id' => $id
+        ])->get();
+        foreach ($orderProducts as $product) {
+            $totalPrice += $product->sum_price;
+        }
+        return $totalPrice;
+    }
+
     private function prepareOrderProductsCreateParams($params)
     {
         $orderProductsParams = [];
         foreach ($params['products'] as $key => $product) {
+            if (empty($product['unique_code'])) continue;
             switch ($params['client_type']) {
                 case Client::CLIENT_TYPE_NORMAL:
                     $orderProductsParams[$key] = $this->getPriceProductByClientType('price', $product['unique_code'], $product['quantity']);
@@ -173,5 +187,40 @@ class OrderService implements \App\Contracts\OrderService
             'quantity_after_order' => $product['quantity'] - $quantity,
             'sum_price' => $quantity * $product[$type],
         ];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function generateThePdfFromOrder($id)
+    {
+        $dateNow = date('Y/m/d H:i');
+        $order = $this->orderRepository->find($id);
+        if (empty($order)) {
+            return false;
+        }
+        $orderProducts = $this->orderProductRepository->where([
+            'order_id' => $order->id
+        ])->get();
+
+        $generatePdf = PDF::loadView('orders.show-preview',[
+            'order' => $order,
+            'orderDetails' => $orderProducts,
+            'dateNow' => $dateNow,
+            'user' => \Auth::user()->name ?? "",
+            'totalQuantity' => $this->getSumQuantity($orderProducts),
+        ])->setPaper('a4', 'landscape');;
+
+        return $generatePdf->download();
+    }
+
+    private function getSumQuantity($orderProducts)
+    {
+        $sum = 0;
+        foreach ($orderProducts as $product) {
+            $sum += $product->quantity;
+        }
+
+        return $sum;
     }
 }

@@ -18,7 +18,7 @@ class CreateOrdersTable extends Migration
             $table->string('unique_code');
             $table->unsignedInteger('client_id');
             $table->integer('client_type')->comment('0: normal; 1: si; 2: le');
-            $table->float('total_price')->default(0);
+            $table->double('total_price',14,3)->default(0);
             $table->timestamps();
 
             $table->foreign('client_id')

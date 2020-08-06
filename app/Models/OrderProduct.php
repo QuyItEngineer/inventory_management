@@ -14,4 +14,10 @@ class OrderProduct extends Model
         'quantity',
         'sum_price',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo('App\Models\Product','product_id');
+
+    }
 }

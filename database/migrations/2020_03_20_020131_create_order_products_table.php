@@ -17,7 +17,7 @@ class CreateOrderProductsTable extends Migration
             $table->unsignedInteger('order_id');
             $table->unsignedInteger('product_id');
             $table->integer('quantity')->default(0);
-            $table->float('sum_price')->default(0);
+            $table->double('sum_price',14,3)->default(0);
             $table->timestamps();
 
             $table->foreign('order_id')

@@ -1,18 +1,42 @@
 <template>
     <div>
         <div class="col-md-12">
+            <div v-for="(item, index) in order_items">
+                <div class="mt-repeater-item row">
+                    <div class="col-md-5 col-12">
+                        <label class="control-label">Sản phẩm: <span class="required"> * </span></label>
+                        <select class="form-control" id="products_data" :name="getProductName('unique_code',index)" v-model="item.unique_code">
+<!--                            <option :value="item.unique_code">{{item.name}}</option>-->
+                            <option v-for="(value, key) in products" :key="key" :value="value.unique_code" disabled>{{value.name}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5 col-12" v-if="item.unique_code !== ''">
+                        <label class="control-label">Số lượng: <span class="required"> * </span></label>
+                        <input type="number" class="form-control" v-model="item.quantity"
+                               :name="getProductName('quantity',index)"
+                               @input="checkQuantity(item.unique_code, item.quantity)" required readonly>
+                        <span :id="'error_quantity_' + item.unique_code" style="color: red; display: none" >Số lượng không đủ</span>
+                    </div>
+                    <div class="col-md-5 col-12" v-else>
+                        <label class="control-label">Số lượng: <span class="required"> * </span></label>
+                        <input type="number" class="form-control" v-model="item.quantity" @input="checkQuantity(item.unique_code, item.quantity)" required readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
             <div data-repeater-list="orders" v-for="(item, index) in items">
                 <div data-repeater-item class="mt-repeater-item row">
                     <div class="mt-repeater-input col-md-5 col-12">
                         <label class="control-label">Sản phẩm: <span class="required"> * </span></label>
-                        <select class="form-control" id="products" :name="getProductName('unique_code',index)" v-model="item.unique_code">
+                        <select class="form-control" id="products" :name="getProductName('unique_code',index + order_items.length)" v-model="item.unique_code">
                             <option v-for="(value, key) in products" :key="key" :value="value.unique_code">{{value.name}}</option>
                         </select>
                     </div>
                     <div class="mt-repeater-input col-md-5 col-12" v-if="item.unique_code !== ''">
                         <label class="control-label">Số lượng: <span class="required"> * </span></label>
                         <input type="number" class="form-control" v-model="item.quantity"
-                               :name="getProductName('quantity',index)"
+                               :name="getProductName('quantity',index + order_items.length)"
                                @input="checkQuantity(item.unique_code, item.quantity)" required>
                         <span :id="'error_quantity_' + item.unique_code" style="color: red; display: none" >Số lượng không đủ</span>
                     </div>
@@ -61,10 +85,15 @@
                     unique_code: '',
                     quantity: '',
                 }],
+                order_items: [{
+                    name: '',
+                    unique_code: '',
+                    quantity: '',
+                }],
             }
         },
         mounted() {
-            this.items = this.orders
+            this.order_items = this.orders
         },
         methods: {
             addNewProduct() {
