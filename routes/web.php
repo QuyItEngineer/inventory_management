@@ -19,16 +19,12 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::group(['middleware'=>'auth'], function () {
+    Route::resource('products', 'ProductController');
 
-Auth::routes(['verify' => true]);
+    Route::resource('clients', 'ClientController');
 
-Route::get('/home', 'HomeController@index')->middleware('verified');
-
-
-Route::resource('products', 'ProductController');
-
-Route::resource('clients', 'ClientController');
-
-Route::resource('orders', 'OrderController');
-Route::get('orders-preview/{id}', 'OrderController@showUpdateDetail')->name('showUpdateDetail');;
-Route::put('orders/{id}/detail', 'OrderController@updateDetail');
+    Route::resource('orders', 'OrderController');
+    Route::get('orders-preview/{id}', 'OrderController@showUpdateDetail')->name('showUpdateDetail');;
+    Route::put('orders/{id}/detail', 'OrderController@updateDetail');
+});
